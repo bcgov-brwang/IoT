@@ -44,9 +44,11 @@ namespace SimulatedTemperatureSensor
         //brucet test
         static byte[] jsonBytes;
         static Message msg;
-        static string jsonList;
+        static List<AirHumidities> jsonList;
 
         public static int Main() => MainAsync().Result;
+
+        static int count = 1;
 
         static async Task<int> MainAsync()
         {
@@ -56,7 +58,7 @@ namespace SimulatedTemperatureSensor
             var airHumidities = PullData();
             //bruce test here
             var sim = new AirHumidities();
-            jsonList = ConverToJson(airHumidities, ref sim);
+            jsonList = ConverToJson(airHumidities);
 
 
             Console.WriteLine($"[{DateTime.UtcNow.ToString("MM/dd/yyyy hh:mm:ss.fff tt", CultureInfo.InvariantCulture)}] Main()");
@@ -70,6 +72,7 @@ namespace SimulatedTemperatureSensor
             //TimeSpan messageDelay = configuration.GetValue("MessageDelay", TimeSpan.FromSeconds(5));
             int messageCount = 1;//configuration.GetValue(MessageCountConfigKey, 500);
             bool sendForever = messageCount < 0;
+            int timeSpane = 3600000;
             //var sim = new SimulatorParameters
             //{
             //    //MachineTempMin = configuration.GetValue<double>("machineTempMin", 21),
@@ -85,7 +88,7 @@ namespace SimulatedTemperatureSensor
 
             string messagesToSendString = sendForever ? "unlimited" : messageCount.ToString();
             Console.WriteLine(
-                $"Initializing simulated get mysql data to send {messagesToSendString} messages, at an interval of {new TimeSpan(1000000).TotalSeconds} seconds.\n"
+                $"Initializing simulated get mysql data to send {messagesToSendString} messages, at an interval of {new TimeSpan(timeSpane).TotalSeconds} seconds.\n"
                 + $"To change this, set the environment variable {MessageCountConfigKey} to the number of messages that should be sent (set it to -1 to send unlimited messages).");
 
             Microsoft.Azure.Devices.Client.TransportType transportType = Microsoft.Azure.Devices.Client.TransportType.Amqp_Tcp_Only;
@@ -107,10 +110,15 @@ namespace SimulatedTemperatureSensor
 
             (CancellationTokenSource cts, ManualResetEventSlim completed, Option<object> handler)
                 = ShutdownHandler.Init(TimeSpan.FromSeconds(5), null);
-            await SendEvents(moduleClient, new TimeSpan(1000000), sendForever, messageCount, sim, cts);
-            await cts.Token.WhenCanceled();
-            completed.Set();
-            handler.ForEach(h => GC.KeepAlive(h));
+
+            foreach (var ah in jsonList)
+            {
+                await SendEvents(moduleClient, new TimeSpan(timeSpane), sendForever, messageCount, ah, cts, count);
+                await cts.Token.WhenCanceled();
+                completed.Set();
+                handler.ForEach(h => GC.KeepAlive(h));
+            }
+
             return 0;
         }
 
@@ -197,6 +205,8 @@ namespace SimulatedTemperatureSensor
             return Task.FromResult(response);
         }
 
+
+
         /// <summary>
         /// Module behavior:
         ///        Sends data periodically (with default frequency of 5 seconds).
@@ -214,9 +224,10 @@ namespace SimulatedTemperatureSensor
             int messageCount,
             //SimulatorParameters sim,
             AirHumidities sim,
-            CancellationTokenSource cts)
+            CancellationTokenSource cts,
+            int count)
         {
-            int count = 1;
+
             //double currentTemp = sim.MachineTempMin;
             //double normal = (sim.MachinePressureMax - sim.MachinePressureMin) / (sim.MachineTempMax - sim.MachineTempMin);
 
@@ -263,13 +274,19 @@ namespace SimulatedTemperatureSensor
                 };
 
                 //string dataBuffer = JsonConvert.SerializeObject(tempData);
-                string dataBuffer = JsonConvert.SerializeObject(jsonList);
-                var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
-                Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {count}, Body: [{dataBuffer}]");
 
-                await moduleClient.SendEventAsync("temperatureOutput", eventMessage);
-                await Task.Delay(messageDelay, cts.Token);
-                count++;
+                int myCount = 1;
+                foreach(var stationData in jsonList)
+                {
+                    string dataBuffer = JsonConvert.SerializeObject(stationData);
+                    var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
+                    Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {myCount}, Body: [{dataBuffer}]");
+                    await moduleClient.SendEventAsync("temperatureOutput", eventMessage);
+                    count++;
+                    await Task.Delay(messageDelay, cts.Token);
+                    myCount++;
+                }
+
             }
 
             if (messageCount < count)
@@ -305,31 +322,11 @@ namespace SimulatedTemperatureSensor
             public int HumidityPercent { get; set; }
         }
 
-        //bruce test
-        static List<AirHumidity> PullData()
+
+
+        //bruce test 1
+        static List<AirHumidity> GetAirHumidityList(MySqlConnection con, MySqlDataReader rdr)
         {
-            string cs = @"server=localhost;userid=dbuser;password=s$cret;database=testdb";
-
-            cs = @"Server=pocmysql.mysql.database.azure.com;UserID=PoCAdminSQL;Password=WQZ2c6sQmtH3i6r;Database=lndb";
-
-            using var con = new MySqlConnection(cs);
-            con.Open();
-
-            Console.WriteLine($"MySQL version : {con.ServerVersion}");
-
-            var stm = "SELECT VERSION()";
-            var cmd = new MySqlCommand(stm, con);
-
-            var version = cmd.ExecuteScalar().ToString();
-            Console.WriteLine($"MySQL version: {version}");
-
-            string sql = "SELECT * FROM lndb.nels_irishman35094_air_humidity";
-            using var cmd_1 = new MySqlCommand(sql, con);
-
-            using MySqlDataReader rdr = cmd_1.ExecuteReader();
-
-
-
             string tmStamp;
             string recNum;
             int stationId;
@@ -342,10 +339,7 @@ namespace SimulatedTemperatureSensor
             float airTemp2Q;
             float rh;
             float dewPoint;
-
-            List<AirHumidity> airHumidityList = new List<AirHumidity>();
-
-
+            List<AirHumidity> result = new List<AirHumidity>();
             try
             {
                 while (rdr.Read())
@@ -378,55 +372,104 @@ namespace SimulatedTemperatureSensor
                         Rh = rdr.GetFloat(10),
                         DewPoint = rdr.GetFloat(11)
                     };
-                    airHumidityList.Add(airHumid);
+                    result.Add(airHumid);
 
-                    Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
-                            stationId, identifier, maxAirTemp1, curAirTemp1, minAirTemp1, airTempQ, airTemp2, airTemp2Q, rh, dewPoint);
+                    //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
+                    //        stationId, identifier, maxAirTemp1, curAirTemp1, minAirTemp1, airTempQ, airTemp2, airTemp2Q, rh, dewPoint);
                 }
             }
-            catch
+            catch (Exception exe)
             {
+                Console.WriteLine(exe.Message);
             }
             finally
             {
-                rdr.Close();
-
-                con.Close();
+                //rdr.Close();
             }
-            return airHumidityList;
-
+            return result;
 
         }
 
-        static AirHumidities globalAirHumidities;
 
-        static string ConverToJson(List<AirHumidity> airHumidities, ref AirHumidities sim)
+        //bruce test
+        static List<List<AirHumidity>> PullData()
         {
-            var ahs = new AirHumidities();
+            List<List<AirHumidity>> result = new List<List<AirHumidity>>();
+            string cs = @"server=localhost;userid=dbuser;password=s$cret;database=testdb";
 
-            ahs.measurements = new Measurements();
-            //ahs.device.DeviceId = "nels_irishman35094_air_humidity";
-            int stationId = 0;
-            foreach (var airHumidity in airHumidities)
+            cs = @"Server=pocmysql.mysql.database.azure.com;UserID=PoCAdminSQL;Password=WQZ2c6sQmtH3i6r;Database=lndb";
+
+            using var con = new MySqlConnection(cs);
+            con.Open();
+            Console.WriteLine($"MySQL version : {con.ServerVersion}");
+
+            string sql = "SELECT * FROM lndb.nels_irishman35094_air_humidity order by RecNum desc limit 1";
+            using var cmd = new MySqlCommand(sql, con);
+            using MySqlDataReader rdr = cmd.ExecuteReader();
+            var ah_list = GetAirHumidityList(con, rdr);
+            con.Close();
+            con.Open();
+
+            string sql_1 = "SELECT * FROM lndb.pg_dragonlake42091_air_humidity order by RecNum desc limit 1";
+            using var cmd_1 = new MySqlCommand(sql_1, con);
+            using MySqlDataReader rdr_1 = cmd_1.ExecuteReader();
+            var ah_list_1 = GetAirHumidityList(con, rdr_1);
+            con.Close();
+            con.Open();
+
+            string sql_2 = "SELECT * FROM lndb.rev_chasmrd28072_air_humidity order by RecNum desc limit 1";
+            using var cmd_2 = new MySqlCommand(sql_2, con);
+            using MySqlDataReader rdr_2 = cmd_2.ExecuteReader();
+
+            var ah_list_2 = GetAirHumidityList(con, rdr_2);
+            con.Close();
+
+
+            List<AirHumidity> airHumidityList = new List<AirHumidity>();
+
+
+
+
+
+            result.Add(ah_list);
+            result.Add(ah_list_1);
+            result.Add(ah_list_2);
+            return result;
+        }
+
+        static List<AirHumidities> ConverToJson(List<List<AirHumidity>> airHumidities)
+        {
+            List<AirHumidities> result = new List<AirHumidities>();
+            foreach (var ah_list in airHumidities)
             {
-                ahs.measurements.TmStamp.Add(airHumidity.TmStamp);
-                ahs.measurements.RecNum.Add(airHumidity.RecNum);
-                ahs.measurements.StationID.Add(airHumidity.StationId);
-                ahs.measurements.Identifier.Add(airHumidity.Identifier);
-                ahs.measurements.MaxAirTemp1.Add(airHumidity.MaxAirTemp1);
-                ahs.measurements.CurAirTemp1.Add(airHumidity.CurAirTemp1);
-                ahs.measurements.MinAirTemp1.Add(airHumidity.MinAirTemp1);
-                ahs.measurements.AirTempQ.Add(airHumidity.AirTempQ);
-                ahs.measurements.AirTemp2.Add(airHumidity.AirTemp2);
-                ahs.measurements.AirTemp2Q.Add(airHumidity.AirTemp2Q);
-                ahs.measurements.RH.Add(airHumidity.Rh);
-                ahs.measurements.Dew_Point.Add(airHumidity.DewPoint);
-                stationId = ahs.measurements.StationID[0];
+                var ahs = new AirHumidities();
+                ahs.measurements = new Measurements();
+                //ahs.device.DeviceId = "nels_irishman35094_air_humidity";
+                int stationId = 0;
+                foreach (var airHumidity in ah_list)
+                {
+                    ahs.measurements.TmStamp.Add(airHumidity.TmStamp);
+                    ahs.measurements.RecNum.Add(airHumidity.RecNum);
+                    ahs.measurements.StationID.Add(airHumidity.StationId);
+                    ahs.measurements.Identifier.Add(airHumidity.Identifier);
+                    ahs.measurements.MaxAirTemp1.Add(airHumidity.MaxAirTemp1);
+                    ahs.measurements.CurAirTemp1.Add(airHumidity.CurAirTemp1);
+                    ahs.measurements.MinAirTemp1.Add(airHumidity.MinAirTemp1);
+                    ahs.measurements.AirTempQ.Add(airHumidity.AirTempQ);
+                    ahs.measurements.AirTemp2.Add(airHumidity.AirTemp2);
+                    ahs.measurements.AirTemp2Q.Add(airHumidity.AirTemp2Q);
+                    ahs.measurements.RH.Add(airHumidity.Rh);
+                    ahs.measurements.Dew_Point.Add(airHumidity.DewPoint);
+                    stationId = airHumidity.StationId;
+                }
+                ahs.device = new Device { deviceId = stationId.ToString() };
+                string obj = JsonConvert.SerializeObject(ahs);
+
+                result.Add(ahs);
+
             }
-            ahs.device = new Device { deviceId = stationId.ToString() };
-            string obj = JsonConvert.SerializeObject(ahs);
-            sim = ahs;
-            return obj;
+
+            return result;
         }
     }
 
