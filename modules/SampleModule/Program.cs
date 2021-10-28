@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
-namespace SimulatedTemperatureSensor
+namespace SampleModule
 {
     using System;
     using System.Globalization;
@@ -19,8 +19,9 @@ namespace SimulatedTemperatureSensor
     using System.Reflection;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using Microsoft.Extensions.Configuration;
     using MySql.Data.MySqlClient;
+
+
 
 
     class Program
@@ -52,16 +53,12 @@ namespace SimulatedTemperatureSensor
 
         static async Task<int> MainAsync()
         {
-
-            //bruce test to get mysql data and create json object
-            //bruce test
             var airHumidities = PullData();
-            //bruce test here
             var sim = new AirHumidities();
             jsonList = ConverToJson(airHumidities);
 
 
-            Console.WriteLine($"[{DateTime.UtcNow.ToString("MM/dd/yyyy hh:mm:ss.fff tt", CultureInfo.InvariantCulture)}] Main()");
+            // Console.WriteLine($"[{DateTime.UtcNow.ToString("MM/dd/yyyy hh:mm:ss.fff tt", CultureInfo.InvariantCulture)}] Main()");
 
             //IConfiguration configuration = new ConfigurationBuilder()
             //    .SetBasePath(Directory.GetCurrentDirectory())
@@ -72,7 +69,7 @@ namespace SimulatedTemperatureSensor
             //TimeSpan messageDelay = configuration.GetValue("MessageDelay", TimeSpan.FromSeconds(5));
             int messageCount = 1;//configuration.GetValue(MessageCountConfigKey, 500);
             bool sendForever = messageCount < 0;
-            int timeSpane = 3600000;
+            //int timeSpane = 3600000;
             //var sim = new SimulatorParameters
             //{
             //    //MachineTempMin = configuration.GetValue<double>("machineTempMin", 21),
@@ -87,12 +84,12 @@ namespace SimulatedTemperatureSensor
 
 
             string messagesToSendString = sendForever ? "unlimited" : messageCount.ToString();
-            Console.WriteLine(
-                $"Initializing simulated get mysql data to send {messagesToSendString} messages, at an interval of {new TimeSpan(timeSpane).TotalSeconds} seconds.\n"
-                + $"To change this, set the environment variable {MessageCountConfigKey} to the number of messages that should be sent (set it to -1 to send unlimited messages).");
+            // Console.WriteLine(
+            //     $"Initializing simulated get mysql data to send {messagesToSendString} messages, at an interval of {new TimeSpan(timeSpane).TotalSeconds} seconds.\n"
+            //     + $"To change this, set the environment variable {MessageCountConfigKey} to the number of messages that should be sent (set it to -1 to send unlimited messages).");
 
             Microsoft.Azure.Devices.Client.TransportType transportType = Microsoft.Azure.Devices.Client.TransportType.Amqp_Tcp_Only;
-            Console.WriteLine($"Using transport {transportType.ToString()}");
+            // Console.WriteLine($"Using transport {transportType.ToString()}");
 
             var retryPolicy = new RetryPolicy(TimeoutErrorDetectionStrategy, TransientRetryStrategy);
             retryPolicy.Retrying += (_, args) =>
@@ -111,15 +108,29 @@ namespace SimulatedTemperatureSensor
             (CancellationTokenSource cts, ManualResetEventSlim completed, Option<object> handler)
                 = ShutdownHandler.Init(TimeSpan.FromSeconds(5), null);
 
-            foreach (var ah in jsonList)
+
+            while (true)
             {
-                await SendEvents(moduleClient, new TimeSpan(timeSpane), sendForever, messageCount, ah, cts, count);
-                await cts.Token.WhenCanceled();
-                completed.Set();
-                handler.ForEach(h => GC.KeepAlive(h));
+                airHumidities = PullData();
+                jsonList = ConverToJson(airHumidities);
+                await SendEvents(moduleClient, new TimeSpan(0, 0, 5), sendForever, jsonList, cts, count);
+                //await cts.Token.WhenCanceled();
+                //completed.Set();
+                //handler.ForEach(h => GC.KeepAlive(h));
+                Thread.Sleep(60000 * 60);//send message hourly
+                Console.WriteLine($"Sending message group {count} again...");
+                count++;
             }
 
-            return 0;
+            // foreach (var ah in jsonList)
+            // {
+            //     await SendEvents(moduleClient, new TimeSpan(0, 0, 60), sendForever, messageCount, ah, cts, count);
+            //     await cts.Token.WhenCanceled();
+            //     completed.Set();
+            //     handler.ForEach(h => GC.KeepAlive(h));
+            // }
+
+            // return 0;
         }
 
         static async Task<ModuleClient> InitModuleClient(Microsoft.Azure.Devices.Client.TransportType transportType)
@@ -143,7 +154,7 @@ namespace SimulatedTemperatureSensor
             await moduleClient.OpenAsync().ConfigureAwait(false);
             await moduleClient.SetMethodHandlerAsync("reset", ResetMethod, null);
 
-            Console.WriteLine("Successfully initialized module client.");
+            // Console.WriteLine("Successfully initialized module client.");
             return moduleClient;
         }
 
@@ -221,78 +232,24 @@ namespace SimulatedTemperatureSensor
             ModuleClient moduleClient,
             TimeSpan messageDelay,
             bool sendForever,
-            int messageCount,
-            //SimulatorParameters sim,
-            AirHumidities sim,
+            List<AirHumidities> sim,
             CancellationTokenSource cts,
             int count)
         {
 
-            //double currentTemp = sim.MachineTempMin;
-            //double normal = (sim.MachinePressureMax - sim.MachinePressureMin) / (sim.MachineTempMax - sim.MachineTempMin);
-
-            while (!cts.Token.IsCancellationRequested && (sendForever || messageCount >= count))
+            int myCount = 1;
+            foreach (var stationData in sim)
             {
-                if (Reset)
-                {
-                    //currentTemp = sim.MachineTempMin;
-                    Reset.Set(false);
-                }
-
-                //if (currentTemp > sim.MachineTempMax)
-                //{
-                //    currentTemp += Rnd.NextDouble() - 0.5; // add value between [-0.5..0.5]
-                //}
-                //else
-                //{
-                //    currentTemp += -0.25 + (Rnd.NextDouble() * 1.5); // add value between [-0.25..1.25] - average +0.5
-                //}
-
-                var tempData = new MessageBody
-                {
-                    Device = new Device
-                    {
-                        deviceId = sim.device.deviceId
-                    },
-                    Measurements = new Measurements
-                    {
-                        TmStamp = sim.measurements.TmStamp,
-                        RecNum = sim.measurements.RecNum,
-                        Identifier = sim.measurements.Identifier,
-                        MaxAirTemp1 = sim.measurements.MaxAirTemp1,
-                        CurAirTemp1 = sim.measurements.CurAirTemp1,
-                        MinAirTemp1 = sim.measurements.MinAirTemp1,
-                        AirTemp2 = sim.measurements.AirTemp2,
-                        AirTemp2Q = sim.measurements.AirTemp2Q,
-                        AirTempQ = sim.measurements.AirTempQ,
-                        RH = sim.measurements.RH,
-                        Dew_Point = sim.measurements.Dew_Point,
-                        StationID = sim.measurements.StationID
-
-                    }
-
-                };
-
-                //string dataBuffer = JsonConvert.SerializeObject(tempData);
-
-                int myCount = 1;
-                foreach(var stationData in jsonList)
-                {
-                    string dataBuffer = JsonConvert.SerializeObject(stationData);
-                    var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
-                    Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {myCount}, Body: [{dataBuffer}]");
-                    await moduleClient.SendEventAsync("temperatureOutput", eventMessage);
-                    count++;
-                    await Task.Delay(messageDelay, cts.Token);
-                    myCount++;
-                }
-
+                string dataBuffer = JsonConvert.SerializeObject(stationData);
+                var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
+                Console.WriteLine($"\t{DateTime.Now.ToLocalTime()}> Sending message: {myCount}, Body: [{dataBuffer}]");
+                await moduleClient.SendEventAsync("temperatureOutput", eventMessage);
+                //await Task.Delay(messageDelay, cts.Token);
+                myCount++;
+                
             }
+            Console.WriteLine($"Done sending {count} messages");
 
-            if (messageCount < count)
-            {
-                Console.WriteLine($"Done sending {messageCount} messages");
-            }
         }
 
         static void CancelProgram(CancellationTokenSource cts)
