@@ -42,7 +42,7 @@ namespace SampleModule
             Noop = 1
         }
 
-        static List<StationDatas> jsonList;
+        static List<WeatherData> jsonList;
 
         public static int Main() => MainAsync().Result;
 
@@ -107,7 +107,7 @@ namespace SampleModule
 
             while (true)
             {
-                
+
                 var tableNames = GetTableNames();
 
                 stationData = PullData(tableNames);
@@ -231,7 +231,7 @@ namespace SampleModule
             ModuleClient moduleClient,
             TimeSpan messageDelay,
             bool sendForever,
-            List<StationDatas> sim,
+            List<WeatherData> sim,
             CancellationTokenSource cts,
             int count)
         {
@@ -281,7 +281,7 @@ namespace SampleModule
 
 
         //bruce test 1
-        static List<StationData> GetAirHumidityList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetAirHumidityList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
@@ -295,7 +295,7 @@ namespace SampleModule
             float airTemp2Q;
             float rh;
             float dewPoint;
-            List<StationData> result = new List<StationData>();
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -313,21 +313,48 @@ namespace SampleModule
                     rh = rdr.GetFloat(10);
                     dewPoint = rdr.GetFloat(11);
 
-                    var airHumid = new AirHumidity
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        MaxAirTemp1 = rdr.GetFloat(4),
-                        CurAirTemp1 = rdr.GetFloat(5),
-                        MinAirTemp1 = rdr.GetFloat(6),
-                        AirTempQ = rdr.GetFloat(7),
-                        AirTemp2 = rdr.GetFloat(8),
-                        AirTemp2Q = rdr.GetFloat(9),
-                        Rh = rdr.GetFloat(10),
-                        DewPoint = rdr.GetFloat(11)
-                    };
+                    var airHumid = new AirHumidities();
+                    airHumid.device = new Device();
+                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.measurements = new AirHumidityMeasurements();
+
+                    airHumid.measurements.TmStamp = new List<string>();
+                    airHumid.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    airHumid.measurements.RecNum = new List<string>();
+                    airHumid.measurements.RecNum.Add(rdr.GetString(1));
+
+           
+
+                    airHumid.measurements.Identifier = new List<float>();
+                    airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    airHumid.measurements.MaxAirTemp1 = new List<float>();
+                    airHumid.measurements.MaxAirTemp1.Add(rdr.GetFloat(4));
+
+                    airHumid.measurements.CurAirTemp1 = new List<float>();
+                    airHumid.measurements.CurAirTemp1.Add(rdr.GetFloat(5));
+
+                    airHumid.measurements.MinAirTemp1 = new List<float>();
+                    airHumid.measurements.MinAirTemp1.Add(rdr.GetFloat(6));
+
+                    airHumid.measurements.AirTempQ = new List<float>();
+                    airHumid.measurements.AirTempQ.Add(rdr.GetFloat(7));
+
+                    airHumid.measurements.AirTemp2 = new List<float>();
+                    airHumid.measurements.AirTemp2.Add(rdr.GetFloat(8));
+
+                    airHumid.measurements.AirTemp2Q = new List<float>();
+                    airHumid.measurements.AirTemp2Q.Add(rdr.GetFloat(9));
+
+                    airHumid.measurements.RH = new List<float>();
+                    airHumid.measurements.RH.Add(rdr.GetFloat(10));
+
+                    airHumid.measurements.Dew_Point = new List<float>();
+                    airHumid.measurements.Dew_Point.Add(rdr.GetFloat(11));
+
+
+                  
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -346,15 +373,15 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetAtmosPressureList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetAtmosPressureList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
             int stationId;
             float identifier;
             float atmPressure;
-            
-            List<StationData> result = new List<StationData>();
+
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -364,17 +391,30 @@ namespace SampleModule
                     stationId = rdr.GetInt32(2);
                     identifier = rdr.GetFloat(3);
                     atmPressure = rdr.GetFloat(4);
-                   
 
-                    var atmosPressure = new AtmosPressure
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        AtmPressure = rdr.GetFloat(4),
-                       
-                    };
+
+                    var atmosPressure = new AtmosPressures();
+                    atmosPressure.device = new Device();
+                    atmosPressure.device.deviceId = rdr.GetInt32(2).ToString();
+
+                    atmosPressure.measurements = new AtmosPressureMeasurements();
+
+
+                    atmosPressure.measurements.TmStamp = new List<string>();
+                    atmosPressure.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    atmosPressure.measurements.RecNum = new List<string>();
+                    atmosPressure.measurements.RecNum.Add(rdr.GetString(1));
+
+     
+
+                    atmosPressure.measurements.Identifier = new List<float>();
+                    atmosPressure.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    atmosPressure.measurements.AtmPressure = new List<float>();
+                    atmosPressure.measurements.AtmPressure.Add(rdr.GetFloat(4));
+
+                   
                     result.Add(atmosPressure);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -393,13 +433,13 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetPavementList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetPavementList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
             int stationId;
             float identifier;
-            
+
 
             float pvmntTemp1;
             float pavementQ;
@@ -414,7 +454,7 @@ namespace SampleModule
             float pvmntSrfCvTh;
             float pvmntSrfCvThQ;
 
-            List<StationData> result = new List<StationData>();
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -437,25 +477,60 @@ namespace SampleModule
                     pvmntSrfCvTh = rdr.GetFloat(14);
                     pvmntSrfCvThQ = rdr.GetFloat(15);
 
-                    var airHumid = new Pavement
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        PvmntTemp1 = rdr.GetFloat(4),
-                        PavementQ = rdr.GetFloat(5),
-                        AltPaveTemp1 = rdr.GetFloat(6),
-                        FrzPntTemp1 = rdr.GetFloat(7),
-                        FrzPntTemp1Q = rdr.GetFloat(8),
-                        PvmnCond1 = rdr.GetFloat(9),
-                        PvmntCond1Q = rdr.GetFloat(10),
-                        SbAsphltTemp = rdr.GetFloat(11),
-                        PvBaseTemp1 = rdr.GetFloat(12),
-                        PvBaseTemp1Q = rdr.GetFloat(13),
-                        PvmntSrfCvTh = rdr.GetFloat(14),
-                        PvmntSrfCvThQ = rdr.GetFloat(15)
-                    };
+                    var airHumid = new Pavements();
+               
+                    airHumid.device = new Device();
+                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.measurements = new PavementMeasurements();
+
+                    airHumid.measurements.TmStamp = new List<string>();
+                    airHumid.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    airHumid.measurements.RecNum = new List<string>();
+                    airHumid.measurements.RecNum.Add(rdr.GetString(1));
+
+
+
+                    airHumid.measurements.Identifier = new List<float>();
+                    airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    airHumid.measurements.PvmntTemp1 = new List<float>();
+                    airHumid.measurements.PvmntTemp1.Add(rdr.GetFloat(4));
+
+                    airHumid.measurements.PavementQ = new List<float>();
+                    airHumid.measurements.PavementQ.Add(rdr.GetFloat(5));
+
+                    airHumid.measurements.AltPaveTemp1 = new List<float>();
+                    airHumid.measurements.AltPaveTemp1.Add(rdr.GetFloat(6));
+
+                    airHumid.measurements.FrzPntTemp1 = new List<float>();
+                    airHumid.measurements.FrzPntTemp1.Add(rdr.GetFloat(7));
+
+                    airHumid.measurements.FrzPntTemp1Q = new List<float>();
+                    airHumid.measurements.FrzPntTemp1Q.Add(rdr.GetFloat(8));
+
+                    airHumid.measurements.PvmnCond1 = new List<float>();
+                    airHumid.measurements.PvmnCond1.Add(rdr.GetFloat(9));
+
+                    airHumid.measurements.PvmntCond1Q = new List<float>();
+                    airHumid.measurements.PvmntCond1Q.Add(rdr.GetFloat(10));
+
+                    airHumid.measurements.SbAsphltTemp = new List<float>();
+                    airHumid.measurements.SbAsphltTemp.Add(rdr.GetFloat(11));
+
+                    airHumid.measurements.PvBaseTemp1 = new List<float>();
+                    airHumid.measurements.PvBaseTemp1.Add(rdr.GetFloat(11));
+
+                    airHumid.measurements.PvBaseTemp1Q = new List<float>();
+                    airHumid.measurements.PvBaseTemp1Q.Add(rdr.GetFloat(11));
+
+                    airHumid.measurements.PvmntSrfCvTh = new List<float>();
+                    airHumid.measurements.PvmntSrfCvTh.Add(rdr.GetFloat(11));
+
+                    airHumid.measurements.PvmntSrfCvThQ = new List<float>();
+                    airHumid.measurements.PvmntSrfCvThQ.Add(rdr.GetFloat(11));
+
+                   
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -474,7 +549,7 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetPrecipitationList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetPrecipitationList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
@@ -489,7 +564,7 @@ namespace SampleModule
             float precipDetRatio;
             float precipDetQ;
 
-            List<StationData> result = new List<StationData>();
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -504,22 +579,45 @@ namespace SampleModule
                     precipGaugeQ = rdr.GetFloat(7);
                     precipDetRatio = rdr.GetFloat(8);
                     precipDetQ = rdr.GetFloat(9);
-        
 
-                    var airHumid = new Precipitation
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        GaugeTot = rdr.GetFloat(4),
-                        NewPrecip = rdr.GetFloat(5),
-                        HrlyPrecip = rdr.GetFloat(6),
-                        PrecipGaugeQ = rdr.GetFloat(7),
-                        PrecipDetRatio = rdr.GetFloat(8),
-                        PrecipDetQ = rdr.GetFloat(9)
-            
-                    };
+
+                    var airHumid = new Precipitations();
+
+
+                    airHumid.device = new Device();
+                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.measurements = new PrecipitationMeasurements();
+
+                    airHumid.measurements.TmStamp = new List<string>();
+                    airHumid.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    airHumid.measurements.RecNum = new List<string>();
+                    airHumid.measurements.RecNum.Add(rdr.GetString(1));
+
+
+
+                    airHumid.measurements.Identifier = new List<float>();
+                    airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    airHumid.measurements.GaugeTot = new List<float>();
+                    airHumid.measurements.GaugeTot.Add(rdr.GetFloat(4));
+
+                    airHumid.measurements.NewPrecip = new List<float>();
+                    airHumid.measurements.NewPrecip.Add(rdr.GetFloat(5));
+
+                    airHumid.measurements.HrlyPrecip = new List<float>();
+                    airHumid.measurements.HrlyPrecip.Add(rdr.GetFloat(6));
+
+                    airHumid.measurements.PrecipGaugeQ = new List<float>();
+                    airHumid.measurements.PrecipGaugeQ.Add(rdr.GetFloat(7));
+
+                    airHumid.measurements.PrecipDetRatio = new List<float>();
+                    airHumid.measurements.PrecipDetRatio.Add(rdr.GetFloat(8));
+
+                    airHumid.measurements.PrecipDetQ = new List<float>();
+                    airHumid.measurements.PrecipDetQ.Add(rdr.GetFloat(9));
+
+           
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -538,7 +636,7 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetSnowList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetSnowList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
@@ -548,8 +646,8 @@ namespace SampleModule
             float hStd;
             float hrlySnow;
             float snowQ;
- 
-            List<StationData> result = new List<StationData>();
+
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -562,20 +660,38 @@ namespace SampleModule
                     hStd = rdr.GetFloat(5);
                     hrlySnow = rdr.GetFloat(6);
                     snowQ = rdr.GetFloat(7);
-                 
 
-                    var airHumid = new Snow
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        HS = rdr.GetFloat(4),
-                        HStd = rdr.GetFloat(5),
-                        HrlySnow = rdr.GetFloat(6),
-                        SnowQ = rdr.GetFloat(7),
-                     
-                    };
+
+                    var airHumid = new Snows();
+
+                    airHumid.device = new Device();
+                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.measurements = new SnowMeasurements();
+
+                    airHumid.measurements.TmStamp = new List<string>();
+                    airHumid.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    airHumid.measurements.RecNum = new List<string>();
+                    airHumid.measurements.RecNum.Add(rdr.GetString(1));
+
+
+
+                    airHumid.measurements.Identifier = new List<float>();
+                    airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    airHumid.measurements.HS = new List<float>();
+                    airHumid.measurements.HS.Add(rdr.GetFloat(4));
+
+                    airHumid.measurements.HStd = new List<float>();
+                    airHumid.measurements.HStd.Add(rdr.GetFloat(5));
+
+                    airHumid.measurements.HrlySnow = new List<float>();
+                    airHumid.measurements.HrlySnow.Add(rdr.GetFloat(6));
+
+                    airHumid.measurements.SnowQ = new List<float>();
+                    airHumid.measurements.SnowQ.Add(rdr.GetFloat(7));
+
+                                     
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -594,13 +710,13 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetWindList(MySqlConnection con, MySqlDataReader rdr)
+        static List<StationDatas> GetWindList(MySqlConnection con, MySqlDataReader rdr)
         {
             string tmStamp;
             string recNum;
             int stationId;
             float identifier;
-   
+
             float maxWindSpd;
             float meanWindSpd;
             float windSpd;
@@ -611,7 +727,7 @@ namespace SampleModule
             float derimeStat;
 
 
-            List<StationData> result = new List<StationData>();
+            List<StationDatas> result = new List<StationDatas>();
             try
             {
                 while (rdr.Read())
@@ -629,21 +745,48 @@ namespace SampleModule
                     windDir = rdr.GetFloat(10);
                     derimeStat = rdr.GetFloat(11);
 
-                    var airHumid = new Wind
-                    {
-                        TmStamp = rdr.GetString(0),
-                        RecNum = rdr.GetString(1),
-                        StationId = rdr.GetInt32(2),
-                        Identifier = rdr.GetFloat(3),
-                        MaxWindSpd = rdr.GetFloat(4),
-                        MeanWindSpd = rdr.GetFloat(5),
-                        WindSpd = rdr.GetFloat(6),
-                        WindSpdQ = rdr.GetFloat(7),
-                        MeanWindDir = rdr.GetFloat(8),
-                        StDevWind = rdr.GetFloat(9),
-                        WindDir = rdr.GetFloat(10),
-                        DerimeStat = rdr.GetFloat(11)
-                    };
+                    var airHumid = new Winds();
+
+                    airHumid.device = new Device();
+                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.measurements = new WindMeasurements();
+
+                    airHumid.measurements.TmStamp = new List<string>();
+                    airHumid.measurements.TmStamp.Add(rdr.GetString(0));
+
+                    airHumid.measurements.RecNum = new List<string>();
+                    airHumid.measurements.RecNum.Add(rdr.GetString(1));
+
+
+
+                    airHumid.measurements.Identifier = new List<float>();
+                    airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
+
+                    airHumid.measurements.MaxWindSpd = new List<float>();
+                    airHumid.measurements.MaxWindSpd.Add(rdr.GetFloat(4));
+
+                    airHumid.measurements.MeanWindSpd = new List<float>();
+                    airHumid.measurements.MeanWindSpd.Add(rdr.GetFloat(5));
+
+                    airHumid.measurements.WindSpd = new List<float>();
+                    airHumid.measurements.WindSpd.Add(rdr.GetFloat(6));
+
+                    airHumid.measurements.WindSpdQ = new List<float>();
+                    airHumid.measurements.WindSpdQ.Add(rdr.GetFloat(7));
+
+                    airHumid.measurements.MeanWindDir = new List<float>();
+                    airHumid.measurements.MeanWindDir.Add(rdr.GetFloat(8));
+
+                    airHumid.measurements.StDevWind = new List<float>();
+                    airHumid.measurements.StDevWind.Add(rdr.GetFloat(9));
+
+                    airHumid.measurements.WindDir = new List<float>();
+                    airHumid.measurements.WindDir.Add(rdr.GetFloat(10));
+
+                    airHumid.measurements.DerimeStat = new List<float>();
+                    airHumid.measurements.DerimeStat.Add(rdr.GetFloat(11));
+
+                  
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -662,9 +805,9 @@ namespace SampleModule
 
         }
 
-        static List<StationData> GetDataFromTable(MySqlConnection con, string tableName)
+        static List<StationDatas> GetDataFromTable(MySqlConnection con, string tableName)
         {
-            var result = new List<StationData>();
+            var result = new List<StationDatas>();
             con.Open();
             //Console.WriteLine($"MySQL version : {con.ServerVersion}");
             string sql = "SELECT * FROM lndb." + tableName + " order by RecNum desc limit 1";
@@ -673,7 +816,7 @@ namespace SampleModule
             if (tableName.Contains("humidity"))
             {
                 var ah_list = GetAirHumidityList(con, rdr);
-                result = ah_list;             
+                result = ah_list;
             }
             if (tableName.Contains("pressure"))
             {
@@ -706,9 +849,9 @@ namespace SampleModule
         }
 
         //bruce test
-        static List<List<StationData>> PullData(List<string> tableNames)
+        static List<List<StationDatas>> PullData(List<string> tableNames)
         {
-            List<List<StationData>> result = new List<List<StationData>>();
+            List<List<StationDatas>> result = new List<List<StationDatas>>();
             string cs = @"server=localhost;userid=dbuser;password=s$cret;database=testdb";
 
             cs = @"Server=pocmysql.mysql.database.azure.com;UserID=PoCAdminSQL;Password=WQZ2c6sQmtH3i6r;Database=lndb";
@@ -751,7 +894,7 @@ namespace SampleModule
                     if (!tableName.Contains("meta"))
                     {
                         result.Add(tableName);
-                    }               
+                    }
                 }
             }
             catch (Exception exe)
@@ -763,11 +906,13 @@ namespace SampleModule
                 rdr.Close();
             }
             con.Close();
-            
+
             return result;
         }
-        static List<StationDatas> ConverToJson(List<List<StationData>> stationData, List<string> tableNames)
+        static List<WeatherData> ConverToJson(List<List<StationDatas>> stationData, List<string> tableNames)
         {
+
+ 
             List<StationDatas> result = new List<StationDatas>();
 
 
@@ -781,25 +926,33 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var airHumidity in stationData[i])
                     {
-                        var tempData = airHumidity as AirHumidity;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.MaxAirTemp1.Add(tempData.MaxAirTemp1);
-                        ahs.measurements.CurAirTemp1.Add(tempData.CurAirTemp1);
-                        ahs.measurements.MinAirTemp1.Add(tempData.MinAirTemp1);
-                        ahs.measurements.AirTempQ.Add(tempData.AirTempQ);
-                        ahs.measurements.AirTemp2.Add(tempData.AirTemp2);
-                        ahs.measurements.AirTemp2Q.Add(tempData.AirTemp2Q);
-                        ahs.measurements.RH.Add(tempData.Rh);
-                        ahs.measurements.Dew_Point.Add(tempData.DewPoint);
-                        stationId = tempData.StationId;
+                        //var tempData = airHumidity as AirHumidity;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.MaxAirTemp1.Add(tempData.MaxAirTemp1);
+                        //ahs.measurements.CurAirTemp1.Add(tempData.CurAirTemp1);
+                        //ahs.measurements.MinAirTemp1.Add(tempData.MinAirTemp1);
+                        //ahs.measurements.AirTempQ.Add(tempData.AirTempQ);
+                        //ahs.measurements.AirTemp2.Add(tempData.AirTemp2);
+                        //ahs.measurements.AirTemp2Q.Add(tempData.AirTemp2Q);
+                        //ahs.measurements.RH.Add(tempData.Rh);
+                        //ahs.measurements.Dew_Point.Add(tempData.DewPoint);
+                        //stationId = tempData.StationId;
+
+                        ahs = airHumidity as AirHumidities;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
+
+
+
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
+
+                
 
                 }
 
@@ -810,13 +963,16 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var atmosPressure in stationData[i])
                     {
-                        var tempData = atmosPressure as AtmosPressure;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.AtmPressure.Add(tempData.AtmPressure);
-                        stationId = tempData.StationId;
+                        //var tempData = atmosPressure as AtmosPressure;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.AtmPressure.Add(tempData.AtmPressure);
+                        //stationId = tempData.StationId;
+
+                        ahs = atmosPressure as AtmosPressures;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
@@ -833,24 +989,27 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var airHumidity in stationData[i])
                     {
-                        var tempData = airHumidity as Pavement;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.PvmntTemp1.Add(tempData.PvmntTemp1);
-                        ahs.measurements.PavementQ.Add(tempData.PavementQ);
-                        ahs.measurements.AltPaveTemp1.Add(tempData.AltPaveTemp1);
-                        ahs.measurements.FrzPntTemp1.Add(tempData.FrzPntTemp1);
-                        ahs.measurements.FrzPntTemp1Q.Add(tempData.FrzPntTemp1Q);
-                        ahs.measurements.PvmnCond1.Add(tempData.PvmnCond1);
-                        ahs.measurements.PvmntCond1Q.Add(tempData.PvmntCond1Q);
-                        ahs.measurements.SbAsphltTemp.Add(tempData.SbAsphltTemp);
-                        ahs.measurements.PvBaseTemp1.Add(tempData.PvBaseTemp1);
-                        ahs.measurements.PvBaseTemp1Q.Add(tempData.PvBaseTemp1Q);
-                        ahs.measurements.PvmntSrfCvTh.Add(tempData.PvmntSrfCvTh);
-                        ahs.measurements.PvmntSrfCvThQ.Add(tempData.PvmntSrfCvThQ);
-                        stationId = tempData.StationId;
+                        //var tempData = airHumidity as Pavement;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.PvmntTemp1.Add(tempData.PvmntTemp1);
+                        //ahs.measurements.PavementQ.Add(tempData.PavementQ);
+                        //ahs.measurements.AltPaveTemp1.Add(tempData.AltPaveTemp1);
+                        //ahs.measurements.FrzPntTemp1.Add(tempData.FrzPntTemp1);
+                        //ahs.measurements.FrzPntTemp1Q.Add(tempData.FrzPntTemp1Q);
+                        //ahs.measurements.PvmnCond1.Add(tempData.PvmnCond1);
+                        //ahs.measurements.PvmntCond1Q.Add(tempData.PvmntCond1Q);
+                        //ahs.measurements.SbAsphltTemp.Add(tempData.SbAsphltTemp);
+                        //ahs.measurements.PvBaseTemp1.Add(tempData.PvBaseTemp1);
+                        //ahs.measurements.PvBaseTemp1Q.Add(tempData.PvBaseTemp1Q);
+                        //ahs.measurements.PvmntSrfCvTh.Add(tempData.PvmntSrfCvTh);
+                        //ahs.measurements.PvmntSrfCvThQ.Add(tempData.PvmntSrfCvThQ);
+                        //stationId = tempData.StationId;
+
+                        ahs = airHumidity as Pavements;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
@@ -867,19 +1026,22 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var airHumidity in stationData[i])
                     {
-                        var tempData = airHumidity as Precipitation;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.GaugeTot.Add(tempData.GaugeTot);
-                        ahs.measurements.NewPrecip.Add(tempData.NewPrecip);
-                        ahs.measurements.HrlyPrecip.Add(tempData.HrlyPrecip);
-                        ahs.measurements.PrecipGaugeQ.Add(tempData.PrecipGaugeQ);
-                        ahs.measurements.PrecipDetRatio.Add(tempData.PrecipDetRatio);
-                        ahs.measurements.PrecipDetQ.Add(tempData.PrecipDetQ);
-         
-                        stationId = tempData.StationId;
+                        //var tempData = airHumidity as Precipitation;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.GaugeTot.Add(tempData.GaugeTot);
+                        //ahs.measurements.NewPrecip.Add(tempData.NewPrecip);
+                        //ahs.measurements.HrlyPrecip.Add(tempData.HrlyPrecip);
+                        //ahs.measurements.PrecipGaugeQ.Add(tempData.PrecipGaugeQ);
+                        //ahs.measurements.PrecipDetRatio.Add(tempData.PrecipDetRatio);
+                        //ahs.measurements.PrecipDetQ.Add(tempData.PrecipDetQ);
+
+                        //stationId = tempData.StationId;
+
+                        ahs = airHumidity as Precipitations;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
@@ -896,17 +1058,20 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var airHumidity in stationData[i])
                     {
-                        var tempData = airHumidity as Snow;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.HS.Add(tempData.HS);
-                        ahs.measurements.HStd.Add(tempData.HStd);
-                        ahs.measurements.HrlySnow.Add(tempData.HrlySnow);
-                        ahs.measurements.SnowQ.Add(tempData.SnowQ);
+                        //var tempData = airHumidity as Snow;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.HS.Add(tempData.HS);
+                        //ahs.measurements.HStd.Add(tempData.HStd);
+                        //ahs.measurements.HrlySnow.Add(tempData.HrlySnow);
+                        //ahs.measurements.SnowQ.Add(tempData.SnowQ);
 
-                        stationId = tempData.StationId;
+                        //stationId = tempData.StationId;
+
+                        ahs = airHumidity as Snows;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
@@ -923,21 +1088,24 @@ namespace SampleModule
                     int stationId = 0;
                     foreach (var airHumidity in stationData[i])
                     {
-                        var tempData = airHumidity as Wind;
-                        ahs.measurements.TmStamp.Add(tempData.TmStamp);
-                        ahs.measurements.RecNum.Add(tempData.RecNum);
-                        ahs.measurements.StationID.Add(tempData.StationId);
-                        ahs.measurements.Identifier.Add(tempData.Identifier);
-                        ahs.measurements.MaxWindSpd.Add(tempData.MaxWindSpd);
-                        ahs.measurements.MeanWindSpd.Add(tempData.MeanWindSpd);
-                        ahs.measurements.WindSpd.Add(tempData.WindSpd);
-                        ahs.measurements.WindSpdQ.Add(tempData.WindSpdQ);
-                        ahs.measurements.MeanWindDir.Add(tempData.MeanWindDir);
-                        ahs.measurements.StDevWind.Add(tempData.StDevWind);
-                        ahs.measurements.WindDir.Add(tempData.WindDir);
-                        ahs.measurements.DerimeStat.Add(tempData.DerimeStat);
+                        //var tempData = airHumidity as Wind;
+                        //ahs.measurements.TmStamp.Add(tempData.TmStamp);
+                        //ahs.measurements.RecNum.Add(tempData.RecNum);
+                        //ahs.measurements.StationID.Add(tempData.StationId);
+                        //ahs.measurements.Identifier.Add(tempData.Identifier);
+                        //ahs.measurements.MaxWindSpd.Add(tempData.MaxWindSpd);
+                        //ahs.measurements.MeanWindSpd.Add(tempData.MeanWindSpd);
+                        //ahs.measurements.WindSpd.Add(tempData.WindSpd);
+                        //ahs.measurements.WindSpdQ.Add(tempData.WindSpdQ);
+                        //ahs.measurements.MeanWindDir.Add(tempData.MeanWindDir);
+                        //ahs.measurements.StDevWind.Add(tempData.StDevWind);
+                        //ahs.measurements.WindDir.Add(tempData.WindDir);
+                        //ahs.measurements.DerimeStat.Add(tempData.DerimeStat);
 
-                        stationId = tempData.StationId;
+                        //stationId = tempData.StationId;
+
+                        ahs = airHumidity as Winds;
+                        stationId = Convert.ToInt32(ahs.device.deviceId);
                     }
                     ahs.device = new Device { deviceId = stationId.ToString() };
                     string obj = JsonConvert.SerializeObject(ahs);
@@ -949,9 +1117,27 @@ namespace SampleModule
 
 
 
+            //bruce test here
+            int count = tableNames.Count / 6;
+            List<WeatherData> wdl = new List<WeatherData>();
+            for (var i = 0; i < result.Count; i += 6)
+            {
+                WeatherData wd = new WeatherData();
+
+                wd.airHumidity = result[i] as StationDatas;
+                wd.atmosPressure = result[i + 1] as StationDatas;
+                wd.pavement = result[i + 2] as StationDatas;
+                wd.precipitation = result[i + 3] as StationDatas;
+                wd.snow = result[i + 4] as  StationDatas;
+                wd.wind = result[i + 5] as  StationDatas;
+                wdl.Add(wd);
+            }
 
 
-            return result;
+            return wdl;
+
+            //return result;
+      
         }
     }
 
@@ -2934,7 +3120,7 @@ namespace SampleModule
              (ex is AggregateException argEx && (argEx.InnerExceptions?.Select(e => HasTimeoutException(e)).Any(e => e) ?? false)));
     }
 
-    class AirHumidity : StationData
+    public class AirHumidity : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -2950,7 +3136,7 @@ namespace SampleModule
         public float DewPoint;
     }
 
-    class AtmosPressure : StationData
+    public class AtmosPressure : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -2959,7 +3145,7 @@ namespace SampleModule
         public float AtmPressure;
     }
 
-    class Pavement : StationData
+    public class Pavement : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -2979,7 +3165,7 @@ namespace SampleModule
         public float PvmntSrfCvThQ;
     }
 
-    class Precipitation : StationData
+    public class Precipitation : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -2993,7 +3179,7 @@ namespace SampleModule
         public float PrecipDetQ;
     }
 
-    class Snow : StationData
+    public class Snow : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -3005,7 +3191,7 @@ namespace SampleModule
         public float SnowQ;
     }
 
-    class Wind : StationData
+    public class Wind : StationData
     {
         public string TmStamp;
         public string RecNum;
@@ -3022,42 +3208,42 @@ namespace SampleModule
     }
 
 
-    class AirHumidities : StationDatas
+    public class AirHumidities : StationDatas
     {
         public Device device;
         public AirHumidityMeasurements measurements;
 
     }
 
-    class AtmosPressures : StationDatas
+    public class AtmosPressures : StationDatas
     {
         public Device device;
         public AtmosPressureMeasurements measurements;
 
     }
 
-    class Pavements : StationDatas
+    public class Pavements : StationDatas
     {
         public Device device;
         public PavementMeasurements measurements;
 
     }
 
-    class Precipitations : StationDatas
+    public class Precipitations : StationDatas
     {
         public Device device;
         public PrecipitationMeasurements measurements;
 
     }
 
-    class Snows : StationDatas
+    public class Snows : StationDatas
     {
         public Device device;
         public SnowMeasurements measurements;
 
     }
 
-    class Winds : StationDatas
+    public class Winds : StationDatas
     {
         public Device device;
         public WindMeasurements measurements;
@@ -3070,7 +3256,7 @@ namespace SampleModule
         [JsonProperty(PropertyName = "device")]
         public Device Device { get; set; }
 
-        
+
 
 
     }
@@ -3166,7 +3352,7 @@ namespace SampleModule
         public List<float> Identifier = new List<float>();
         [JsonProperty(PropertyName = "atmPressure")]
         public List<float> AtmPressure = new List<float>();
-       
+
     }
 
     public class PavementMeasurements
@@ -3248,7 +3434,7 @@ namespace SampleModule
         public List<float> HrlySnow = new List<float>();
         [JsonProperty(PropertyName = "nnowQ")]
         public List<float> SnowQ = new List<float>();
-      
+
     }
 
     public class WindMeasurements
@@ -3285,4 +3471,14 @@ namespace SampleModule
     public interface StationData { }
 
     public interface StationDatas { }
+
+    public class WeatherData
+    {
+        public StationDatas airHumidity;
+        public StationDatas atmosPressure;
+        public StationDatas pavement;
+        public StationDatas precipitation;
+        public StationDatas snow;
+        public StationDatas wind;
+    }
 }
