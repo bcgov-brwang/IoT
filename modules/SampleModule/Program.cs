@@ -42,7 +42,7 @@ namespace SampleModule
             Noop = 1
         }
 
-        static List<WeatherData> jsonList;
+        static List<WeatherData1> jsonList;
 
         public static int Main() => MainAsync().Result;
 
@@ -231,7 +231,7 @@ namespace SampleModule
             ModuleClient moduleClient,
             TimeSpan messageDelay,
             bool sendForever,
-            List<WeatherData> sim,
+            List<WeatherData1> sim,
             CancellationTokenSource cts,
             int count)
         {
@@ -314,8 +314,7 @@ namespace SampleModule
                     dewPoint = rdr.GetFloat(11);
 
                     var airHumid = new AirHumidities();
-                    airHumid.device = new Device();
-                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.deviceId = rdr.GetInt32(2).ToString();
                     airHumid.measurements = new AirHumidityMeasurements();
 
                     airHumid.measurements.TmStamp = new List<string>();
@@ -324,7 +323,7 @@ namespace SampleModule
                     airHumid.measurements.RecNum = new List<string>();
                     airHumid.measurements.RecNum.Add(rdr.GetString(1));
 
-           
+
 
                     airHumid.measurements.Identifier = new List<float>();
                     airHumid.measurements.Identifier.Add(rdr.GetFloat(3));
@@ -354,7 +353,7 @@ namespace SampleModule
                     airHumid.measurements.Dew_Point.Add(rdr.GetFloat(11));
 
 
-                  
+
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -394,8 +393,7 @@ namespace SampleModule
 
 
                     var atmosPressure = new AtmosPressures();
-                    atmosPressure.device = new Device();
-                    atmosPressure.device.deviceId = rdr.GetInt32(2).ToString();
+                    atmosPressure.deviceId = rdr.GetInt32(2).ToString();
 
                     atmosPressure.measurements = new AtmosPressureMeasurements();
 
@@ -406,7 +404,7 @@ namespace SampleModule
                     atmosPressure.measurements.RecNum = new List<string>();
                     atmosPressure.measurements.RecNum.Add(rdr.GetString(1));
 
-     
+
 
                     atmosPressure.measurements.Identifier = new List<float>();
                     atmosPressure.measurements.Identifier.Add(rdr.GetFloat(3));
@@ -414,7 +412,7 @@ namespace SampleModule
                     atmosPressure.measurements.AtmPressure = new List<float>();
                     atmosPressure.measurements.AtmPressure.Add(rdr.GetFloat(4));
 
-                   
+
                     result.Add(atmosPressure);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -478,9 +476,8 @@ namespace SampleModule
                     pvmntSrfCvThQ = rdr.GetFloat(15);
 
                     var airHumid = new Pavements();
-               
-                    airHumid.device = new Device();
-                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+
+                    airHumid.deviceId = rdr.GetInt32(2).ToString();
                     airHumid.measurements = new PavementMeasurements();
 
                     airHumid.measurements.TmStamp = new List<string>();
@@ -530,7 +527,7 @@ namespace SampleModule
                     airHumid.measurements.PvmntSrfCvThQ = new List<float>();
                     airHumid.measurements.PvmntSrfCvThQ.Add(rdr.GetFloat(11));
 
-                   
+
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -584,8 +581,7 @@ namespace SampleModule
                     var airHumid = new Precipitations();
 
 
-                    airHumid.device = new Device();
-                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.deviceId = rdr.GetInt32(2).ToString();
                     airHumid.measurements = new PrecipitationMeasurements();
 
                     airHumid.measurements.TmStamp = new List<string>();
@@ -617,7 +613,7 @@ namespace SampleModule
                     airHumid.measurements.PrecipDetQ = new List<float>();
                     airHumid.measurements.PrecipDetQ.Add(rdr.GetFloat(9));
 
-           
+
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -664,8 +660,7 @@ namespace SampleModule
 
                     var airHumid = new Snows();
 
-                    airHumid.device = new Device();
-                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.deviceId = rdr.GetInt32(2).ToString();
                     airHumid.measurements = new SnowMeasurements();
 
                     airHumid.measurements.TmStamp = new List<string>();
@@ -691,7 +686,7 @@ namespace SampleModule
                     airHumid.measurements.SnowQ = new List<float>();
                     airHumid.measurements.SnowQ.Add(rdr.GetFloat(7));
 
-                                     
+
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -747,8 +742,7 @@ namespace SampleModule
 
                     var airHumid = new Winds();
 
-                    airHumid.device = new Device();
-                    airHumid.device.deviceId = rdr.GetInt32(2).ToString();
+                    airHumid.deviceId = rdr.GetInt32(2).ToString();
                     airHumid.measurements = new WindMeasurements();
 
                     airHumid.measurements.TmStamp = new List<string>();
@@ -786,7 +780,7 @@ namespace SampleModule
                     airHumid.measurements.DerimeStat = new List<float>();
                     airHumid.measurements.DerimeStat.Add(rdr.GetFloat(11));
 
-                  
+
                     result.Add(airHumid);
 
                     //Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11}", tmStamp, recNum,
@@ -909,10 +903,10 @@ namespace SampleModule
 
             return result;
         }
-        static List<WeatherData> ConverToJson(List<List<StationDatas>> stationData, List<string> tableNames)
+        static List<WeatherData1> ConverToJson(List<List<StationDatas>> stationData, List<string> tableNames)
         {
 
- 
+
             List<StationDatas> result = new List<StationDatas>();
 
 
@@ -942,17 +936,17 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = airHumidity as AirHumidities;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
 
 
 
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
 
-                
+
 
                 }
 
@@ -972,9 +966,9 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = atmosPressure as AtmosPressures;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
@@ -1009,9 +1003,9 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = airHumidity as Pavements;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
@@ -1041,9 +1035,9 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = airHumidity as Precipitations;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
@@ -1071,9 +1065,9 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = airHumidity as Snows;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
@@ -1105,9 +1099,9 @@ namespace SampleModule
                         //stationId = tempData.StationId;
 
                         ahs = airHumidity as Winds;
-                        stationId = Convert.ToInt32(ahs.device.deviceId);
+                        stationId = Convert.ToInt32(ahs.deviceId);
                     }
-                    ahs.device = new Device { deviceId = stationId.ToString() };
+                    ahs.deviceId = stationId.ToString();
                     string obj = JsonConvert.SerializeObject(ahs);
 
                     result.Add(ahs as StationDatas);
@@ -1120,24 +1114,74 @@ namespace SampleModule
             //bruce test here
             int count = tableNames.Count / 6;
             List<WeatherData> wdl = new List<WeatherData>();
+            List<WeatherData1> wdl1 = new List<WeatherData1>();
             for (var i = 0; i < result.Count; i += 6)
             {
                 WeatherData wd = new WeatherData();
+                WeatherData1 wd1 = new WeatherData1();
 
                 wd.airHumidity = result[i] as StationDatas;
                 wd.atmosPressure = result[i + 1] as StationDatas;
                 wd.pavement = result[i + 2] as StationDatas;
                 wd.precipitation = result[i + 3] as StationDatas;
-                wd.snow = result[i + 4] as  StationDatas;
-                wd.wind = result[i + 5] as  StationDatas;
+                wd.snow = result[i + 4] as StationDatas;
+                wd.wind = result[i + 5] as StationDatas;
+
+
+                
+                var temp = wd.airHumidity as AirHumidities;
+                wd1.deviceId = temp.deviceId;
+                wd1.measurements = new Measurements();
+                wd1.measurements.timestamp = temp.measurements.TmStamp[0];
+                wd1.measurements.maxAirTemp = temp.measurements.MaxAirTemp1[0];
+                wd1.measurements.currentAirTemp = temp.measurements.CurAirTemp1[0];
+                wd1.measurements.minAirTemp = temp.measurements.MinAirTemp1[0];
+                wd1.measurements.airTempQuality = temp.measurements.AirTempQ[0];
+                wd1.measurements.airTempAlternate = temp.measurements.AirTemp2[0];
+                wd1.measurements.airTempAlternateQuality = temp.measurements.AirTemp2Q[0];
+                wd1.measurements.relativeHumidity = temp.measurements.RH[0];
+                wd1.measurements.dewPoint = temp.measurements.Dew_Point[0];
+
+                var temp1 = wd.atmosPressure as AtmosPressures;
+
+                wd1.measurements.atmospherePressure = temp1.measurements.AtmPressure[0];
+
+
+                var temp2 = wd.pavement as Pavements;
+
+                wd1.measurements.pavementTemp = temp2.measurements.PvmntTemp1[0];
+                wd1.measurements.pavementTempQuality = temp2.measurements.PavementQ[0];
+                wd1.measurements.alternatePavementTemp = temp2.measurements.AltPaveTemp1[0];
+                wd1.measurements.freezePointTemp = temp2.measurements.FrzPntTemp1[0];
+                wd1.measurements.freezePointTempQuality = temp2.measurements.FrzPntTemp1Q[0];
+                wd1.measurements.pavementCondition = temp2.measurements.PvmnCond1[0];
+                wd1.measurements.pavementConditionQuality = temp2.measurements.PvmntCond1Q[0];
+                wd1.measurements.subAsphaltTemp = temp2.measurements.SbAsphltTemp[0];
+                wd1.measurements.pavementBaseTemp = temp2.measurements.PvBaseTemp1[0];
+                wd1.measurements.pavementBaseTempQuality = temp2.measurements.PvBaseTemp1Q[0];
+                wd1.measurements.pavementSurfaceConductivity = temp2.measurements.PvmntSrfCvTh[0];
+                wd1.measurements.pavementSurfaceConductivityQuality = temp2.measurements.PvmntSrfCvThQ[0];
+
+
+                var temp3 = wd.wind as Winds;
+                wd1.measurements.maxWindSpeed = temp3.measurements.MaxWindSpd[0];
+                wd1.measurements.meanWindSpeed = temp3.measurements.MeanWindSpd[0];
+                wd1.measurements.windSpeed = temp3.measurements.WindSpd[0];
+                wd1.measurements.windSpeedQuality = temp3.measurements.WindSpdQ[0];
+                wd1.measurements.meanWindDirection = temp3.measurements.MeanWindDir[0];
+                wd1.measurements.standardWindDeviation = temp3.measurements.StDevWind[0];
+                wd1.measurements.windDirection = temp3.measurements.WindDir[0];
+
                 wdl.Add(wd);
+                wdl1.Add(wd1);
             }
 
 
-            return wdl;
+            //return wdl;
+            return wdl1;
 
-            //return result;
-      
+ 
+
         }
     }
 
@@ -3210,42 +3254,42 @@ namespace SampleModule
 
     public class AirHumidities : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public AirHumidityMeasurements measurements;
 
     }
 
     public class AtmosPressures : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public AtmosPressureMeasurements measurements;
 
     }
 
     public class Pavements : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public PavementMeasurements measurements;
 
     }
 
     public class Precipitations : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public PrecipitationMeasurements measurements;
 
     }
 
     public class Snows : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public SnowMeasurements measurements;
 
     }
 
     public class Winds : StationDatas
     {
-        public Device device;
+        public string deviceId;
         public WindMeasurements measurements;
 
     }
@@ -3253,8 +3297,8 @@ namespace SampleModule
 
     public class MessageBody
     {
-        [JsonProperty(PropertyName = "device")]
-        public Device Device { get; set; }
+        [JsonProperty(PropertyName = "deviceId")]
+        public string DeviceId { get; set; }
 
 
 
@@ -3465,7 +3509,125 @@ namespace SampleModule
         public List<float> DerimeStat = new List<float>();
     }
 
+    public class Measurements
+    {
+        [JsonProperty(PropertyName = "timestamp")]
+        public string timestamp;
 
+        [JsonProperty(PropertyName = "maxAirTemp")]
+        public float maxAirTemp;
+
+        [JsonProperty(PropertyName = "currentAirTemp")]
+        public float currentAirTemp;
+
+        [JsonProperty(PropertyName = "minAirTemp")]
+        public float minAirTemp;
+
+        [JsonProperty(PropertyName = "airTempQuality")]
+        public float airTempQuality;
+
+
+        [JsonProperty(PropertyName = "airTempAlternate")]
+        public float airTempAlternate;
+
+
+
+        [JsonProperty(PropertyName = "airTempAlternateQuality")]
+        public float airTempAlternateQuality;
+
+
+        [JsonProperty(PropertyName = "relativeHumidity")]
+        public float relativeHumidity;
+
+
+        [JsonProperty(PropertyName = "dewPoint")]
+        public float dewPoint;
+
+
+
+        [JsonProperty(PropertyName = "atmospherePressure")]
+        public float atmospherePressure;
+
+
+        [JsonProperty(PropertyName = "pavementTemp")]
+        public float pavementTemp;
+
+
+
+
+        [JsonProperty(PropertyName = "pavementTempQuality")]
+        public float pavementTempQuality;
+
+
+
+        [JsonProperty(PropertyName = "alternatePavementTemp")]
+        public float alternatePavementTemp;
+
+
+        [JsonProperty(PropertyName = "freezePointTemp")]
+        public float freezePointTemp;
+
+
+
+        [JsonProperty(PropertyName = "freezePointTempQuality")]
+        public float freezePointTempQuality;
+
+
+        [JsonProperty(PropertyName = "pavementCondition")]
+        public float pavementCondition;
+
+
+        [JsonProperty(PropertyName = "pavementConditionQuality")]
+        public float pavementConditionQuality;
+
+
+        [JsonProperty(PropertyName = "subAsphaltTemp")]
+        public float subAsphaltTemp;
+
+
+        [JsonProperty(PropertyName = "pavementBaseTemp")]
+        public float pavementBaseTemp;
+
+
+        [JsonProperty(PropertyName = "pavementBaseTempQuality")]
+        public float pavementBaseTempQuality;
+
+
+        [JsonProperty(PropertyName = "pavementSurfaceConductivity")]
+        public float pavementSurfaceConductivity;
+
+
+        [JsonProperty(PropertyName = "pavementSurfaceConductivityQuality")]
+        public float pavementSurfaceConductivityQuality;
+
+
+        [JsonProperty(PropertyName = "maxWindSpeed")]
+        public float maxWindSpeed;
+
+        [JsonProperty(PropertyName = "meanWindSpeed")]
+        public float meanWindSpeed;
+
+
+        [JsonProperty(PropertyName = "windSpeed")]
+        public float windSpeed;
+
+
+        [JsonProperty(PropertyName = "windSpeedQuality")]
+        public float windSpeedQuality;
+
+
+        [JsonProperty(PropertyName = "meanWindDirection")]
+        public float meanWindDirection;
+
+        [JsonProperty(PropertyName = "standardWindDeviation")]
+        public float standardWindDeviation;
+
+        [JsonProperty(PropertyName = "windDirection")]
+        public float windDirection;
+
+
+
+    }
 
 
     public interface StationData { }
@@ -3480,5 +3642,14 @@ namespace SampleModule
         public StationDatas precipitation;
         public StationDatas snow;
         public StationDatas wind;
+
+        public string deviceId;
+        public Measurements measurements;
+    }
+
+    public class WeatherData1
+    {
+        public string deviceId;
+        public Measurements measurements;
     }
 }
