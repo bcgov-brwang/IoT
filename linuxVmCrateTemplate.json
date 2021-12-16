@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://github.com/bcgov-brwang/IoT/edit/master/linuxVmCrateTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "dnsLabelPrefix": {
