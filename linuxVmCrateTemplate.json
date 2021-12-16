@@ -224,9 +224,9 @@
     //  "type": "string",
     //  "value": "[concat('FQDN: ', reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn)]"
     //},
-    "PublicSSH": {
-      "type": "string",
-      "value": "[concat('SSH : ssh ', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))).osProfile.adminUsername, '@', reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn)]"
-    }
+    //"PublicSSH": {
+    //  "type": "string",
+    //  "value": "[concat('SSH : ssh ', reference(resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))).osProfile.adminUsername, '@', reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))).dnsSettings.fqdn)]"
+    //}
   }
 }
