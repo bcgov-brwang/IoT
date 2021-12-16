@@ -104,18 +104,18 @@
     "noRule": []
   },
   "resources": [
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsLabelPrefix')]"
-        }
-      }
-    },
+    //{
+    //  "apiVersion": "2015-06-15",
+    //  "type": "Microsoft.Network/publicIPAddresses",
+    //  "name": "[variables('publicIPAddressName')]",
+    //  "location": "[resourceGroup().location]",
+    //  "properties": {
+    //    "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+    //    "dnsSettings": {
+    //      "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+    //    }
+    //  }
+    //},
     {
       "comments": "Default Network Security Group for template",
       "type": "Microsoft.Network/networkSecurityGroups",
