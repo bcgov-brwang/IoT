@@ -23,7 +23,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_DS1_v2",
+      "defaultValue": "Standard_B2s",
       "metadata": {
         "description": "VM size"
       }
@@ -70,7 +70,7 @@
     "addressPrefix": "10.0.0.0/16",
     "subnet1Name": "[concat('subnet-', uniquestring(parameters('dnsLabelPrefix')))]",
     "subnet1Prefix": "10.0.0.0/24",
-    "publicIPAddressType": "Dynamic",
+    "publicIPAddressType": "",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "linuxConfiguration": {
