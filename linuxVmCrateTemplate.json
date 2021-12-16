@@ -66,38 +66,45 @@
     "nicName": "[concat('nic-', uniquestring(parameters('dnsLabelPrefix')))]",
     "vmName": "[parameters('dnsLabelPrefix')]",
     "virtualNetworkName": "[concat('vnet-', uniquestring(parameters('dnsLabelPrefix')))]",
+    //"publicIPAddressName": "[concat('ip-', parameters('dnsLabelPrefix'))]",
     "addressPrefix": "10.0.0.0/16",
     "subnet1Name": "[concat('subnet-', uniquestring(parameters('dnsLabelPrefix')))]",
     "subnet1Prefix": "10.0.0.0/24",
+    //"publicIPAddressType": "Dynamic",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
-        "publicKeys": [{
-          "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-          "keyData": "[parameters('adminPasswordOrKey')]"
-        }]
+        "publicKeys": [
+          {
+            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+            "keyData": "[parameters('adminPasswordOrKey')]"
+          }
+        ]
       }
     },
     "dcs": "[parameters('deviceConnectionString')]",
     "networkSecurityGroupName": "[concat('nsg-', uniquestring(parameters('dnsLabelPrefix')))]",
-    "sshRule": [{
-      "name": "default-allow-22",
-      "properties": {
-        "priority": 1000,
-        "access": "Allow",
-        "direction": "Inbound",
-        "destinationPortRange": "22",
-        "protocol": "Tcp",
-        "sourceAddressPrefix": "*",
-        "sourcePortRange": "*",
-        "destinationAddressPrefix": "*"
+    "sshRule": [
+      {
+        "name": "default-allow-22",
+        "properties": {
+          "priority": 1000,
+          "access": "Allow",
+          "direction": "Inbound",
+          "destinationPortRange": "22",
+          "protocol": "Tcp",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*"
+        }
       }
-    }],
+    ],
     "noRule": []
   },
-  "resources": [{
+  "resources": [
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
@@ -133,15 +140,17 @@
             "[variables('addressPrefix')]"
           ]
         },
-        "subnets": [{
-          "name": "[variables('subnet1Name')]",
-          "properties": {
-            "addressPrefix": "[variables('subnet1Prefix')]",
-            "networkSecurityGroup": {
-              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        "subnets": [
+          {
+            "name": "[variables('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
             }
           }
-        }]
+        ]
       }
     },
     {
@@ -154,6 +163,23 @@
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              //"publicIPAddress": {
+              //  "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              //},
+              "subnet": {
+                "id": "[variables('subnet1Ref')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "apiVersion": "2016-04-30-preview",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
@@ -184,9 +210,11 @@
           }
         },
         "networkProfile": {
-          "networkInterfaces": [{
-            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-          }]
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
         }
       }
     }
