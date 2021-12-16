@@ -66,7 +66,7 @@
     "nicName": "[concat('nic-', uniquestring(parameters('dnsLabelPrefix')))]",
     "vmName": "[parameters('dnsLabelPrefix')]",
     "virtualNetworkName": "[concat('vnet-', uniquestring(parameters('dnsLabelPrefix')))]",
-    //"publicIPAddressName": "[concat('ip-', parameters('dnsLabelPrefix'))]",
+    "publicIPAddressName": "[concat('ip-', parameters('dnsLabelPrefix'))]",
     "addressPrefix": "10.0.0.0/16",
     "subnet1Name": "[concat('subnet-', uniquestring(parameters('dnsLabelPrefix')))]",
     "subnet1Prefix": "10.0.0.0/24",
