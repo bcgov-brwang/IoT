@@ -1,5 +1,5 @@
 {
-  "$schema": "https://github.com/bcgov-brwang/IoT/edit/master/linuxVmCrateTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "dnsLabelPrefix": {
@@ -70,7 +70,7 @@
     "addressPrefix": "10.0.0.0/16",
     "subnet1Name": "[concat('subnet-', uniquestring(parameters('dnsLabelPrefix')))]",
     "subnet1Prefix": "10.0.0.0/24",
-    "publicIPAddressType": "",
+    "publicIPAddressType": "Dynamic",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
     "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',variables('subnet1Name'))]",
     "linuxConfiguration": {
